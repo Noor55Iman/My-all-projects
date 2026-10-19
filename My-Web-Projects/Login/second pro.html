@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Fraunces', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: { neon: '#00f2fe', hot: '#ff0055' },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { background: #0a0a0a; }
+
+    /* Glitch border: two offset outlines (cyan + red) sit behind the card */
+    .glitch-card { position: relative; isolation: isolate; }
+    .glitch-card::before,
+    .glitch-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1.5px solid;
+      z-index: -1;
+      pointer-events: none;
+      transition: transform .25s ease, opacity .25s ease;
+    }
+    .glitch-card::before {
+      border-color: #00f2fe;
+      transform: translate(-3px, -3px);
+      box-shadow: 0 0 22px rgba(0, 242, 254, .35);
+    }
+    .glitch-card::after {
+      border-color: #ff0055;
+      transform: translate(3px, 3px);
+      box-shadow: 0 0 22px rgba(255, 0, 85, .35);
+    }
+    /* Side outlines slowly drift apart and back (smooth transition loop) */
+    @keyframes drift-cyan {
+      0%   { transform: translate(-3px, -3px); }
+      50%  { transform: translate(-9px, -2px); }
+      100% { transform: translate(-3px, -3px); }
+    }
+    @keyframes drift-red {
+      0%   { transform: translate(3px, 3px); }
+      50%  { transform: translate(9px, 2px); }
+      100% { transform: translate(3px, 3px); }
+    }
+    .glitch-card::before { animation: drift-cyan 4s ease-in-out infinite; }
+    .glitch-card::after  { animation: drift-red 4s ease-in-out infinite; }
+    .glitch-card:hover::before { animation-duration: 1.6s; }
+    .glitch-card:hover::after  { animation-duration: 1.6s; }
+
+    /* A quick glitch jitter plays when the card is first shown and on failed submit */
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      20% { transform: translate(-2px, 1px); }
+      40% { transform: translate(2px, -1px); }
+      60% { transform: translate(-1px, -2px); }
+      80% { transform: translate(1px, 2px); }
+    }
+    .glitch-run { animation: glitch .35s steps(2, end) 1; }
+
+    /* Underline fields */
+    .field { position: relative; }
+    .field input {
+      transition: border-color .25s ease, transform .25s ease;
+    }
+    .field:hover input { border-color: #6b7280; }
+    .field input:focus { border-color: transparent; }
+    .field .bar {
+      position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
+      background: linear-gradient(90deg, #00f2fe, #ff0055);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .35s cubic-bezier(.2, .8, .2, 1);
+      box-shadow: 0 0 10px rgba(0, 242, 254, .6);
+    }
+    .field input:focus ~ .bar { transform: scaleX(1); }
+    .field:focus-within label { color: #00f2fe; }
+    .field.invalid input { border-color: #ff0055; }
+    .field.invalid .bar { transform: scaleX(0); }
+
+    /* Button glow */
+    .btn-glow { box-shadow: 0 0 18px rgba(0, 242, 254, .55), 0 0 40px rgba(0, 242, 254, .25); }
+    .btn-glow:hover { box-shadow: 0 0 24px rgba(0, 242, 254, .8), 0 0 56px rgba(0, 242, 254, .35); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body class="font-sans text-gray-100 antialiased">
+  <main class="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-6 py-10">
+    <section id="card" class="glitch-card glitch-run w-full max-w-md p-8 sm:p-10 rounded-2xl bg-[#18191c]">
+      <h1 class="font-display text-4xl text-center text-gray-50 tracking-tight">Login</h1>
+      <p class="mt-2 text-center text-sm text-gray-400">Welcome back. Enter your details to continue.</p>
+
+      <form id="loginForm" class="mt-9 space-y-7" novalidate>
+        <!-- Username -->
+        <div class="field">
+          <label for="username" class="block text-sm text-gray-400 transition-colors duration-200">Username</label>
+          <input id="username" name="username" type="text" autocomplete="username" placeholder="muskan"
+            class="mt-1 w-full bg-transparent border-b border-gray-600 py-2 text-gray-100 placeholder-gray-600 outline-none" />
+          <span class="bar"></span>
+          <p class="error mt-1 min-h-[1.25rem] text-xs text-hot" aria-live="polite"></p>
+        </div>
+
+        <!-- Email -->
+        <div class="field">
+          <label for="email" class="block text-sm text-gray-400 transition-colors duration-200">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="student@example.com"
+            class="mt-1 w-full bg-transparent border-b border-gray-600 py-2 text-gray-100 placeholder-gray-600 outline-none" />
+          <span class="bar"></span>
+          <p class="error mt-1 min-h-[1.25rem] text-xs text-hot" aria-live="polite"></p>
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <label for="password" class="block text-sm text-gray-400 transition-colors duration-200">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••"
+            class="mt-1 w-full bg-transparent border-b border-gray-600 py-2 pr-14 text-gray-100 placeholder-gray-600 outline-none" />
+          <button type="button" id="togglePw"
+            class="absolute right-0 bottom-9 text-xs text-gray-500 hover:text-neon focus-visible:text-neon outline-none transition-colors"
+            aria-label="Show password" aria-pressed="false">Show</button>
+          <span class="bar"></span>
+          <p class="error mt-1 min-h-[1.25rem] text-xs text-hot" aria-live="polite"></p>
+        </div>
+
+        <!-- Remember me -->
+        <label class="flex items-center gap-3 text-sm text-gray-300 cursor-pointer select-none w-fit">
+          <input id="remember" type="checkbox" class="h-4 w-4 rounded border-gray-600 bg-transparent accent-[#00f2fe] cursor-pointer" />
+          Remember me
+        </label>
+
+        <!-- Submit -->
+        <button type="submit" id="submitBtn"
+          class="btn-glow w-full rounded-full bg-neon py-3 font-medium text-black transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neon">
+          Login
+        </button>
+      </form>
+
+      <p class="mt-8 text-center text-sm text-gray-400">
+        Don't have an account?
+        <a href="#" class="text-neon font-medium hover:underline underline-offset-4 focus-visible:underline outline-none">Sign Up</a>
+      </p>
+    </section>
+
+    <!-- Toast -->
+    <div id="toast" role="status"
+      class="pointer-events-none fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-6 opacity-0 rounded-full border border-neon/40 bg-[#18191c] px-5 py-2.5 text-sm text-neon shadow-[0_0_20px_rgba(0,242,254,.25)] transition duration-300">
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const card = document.getElementById('card');
+    const toast = document.getElementById('toast');
+    const pw = document.getElementById('password');
+    const toggle = document.getElementById('togglePw');
+
+    const rules = {
+      username: (v) => (v.trim().length >= 3 ? '' : 'Username must be at least 3 characters.'),
+      email: (v) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Enter a valid email address.'),
+      password: (v) => (v.length >= 6 ? '' : 'Password must be at least 6 characters.'),
+    };
+
+    function setError(input, message) {
+      const field = input.closest('.field');
+      field.classList.toggle('invalid', Boolean(message));
+      field.querySelector('.error').textContent = message;
+      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    }
+
+    function validate(input) {
+      const message = rules[input.name](input.value);
+      setError(input, message);
+      return !message;
+    }
+
+    // Validate on blur; clear errors as the user fixes them
+    Object.keys(rules).forEach((name) => {
+      const input = form.elements[name];
+      input.addEventListener('blur', () => input.value && validate(input));
+      input.addEventListener('input', () => input.closest('.field').classList.contains('invalid') && validate(input));
+    });
+
+    // Show / hide password
+    toggle.addEventListener('click', () => {
+      const show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      toggle.textContent = show ? 'Hide' : 'Show';
+      toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      toggle.setAttribute('aria-pressed', String(show));
+    });
+
+    function glitch() {
+      card.classList.remove('glitch-run');
+      void card.offsetWidth; // restart animation
+      card.classList.add('glitch-run');
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.remove('opacity-0', 'translate-y-6');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('opacity-0', 'translate-y-6'), 2600);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const valid = Object.keys(rules).map((n) => validate(form.elements[n])).every(Boolean);
+
+      if (!valid) {
+        glitch();
+        form.querySelector('.invalid input')?.focus();
+        return;
+      }
+
+      const data = {
+        username: form.elements.username.value.trim(),
+        email: form.elements.email.value.trim(),
+        remember: document.getElementById('remember').checked,
+      };
+      console.log('Login submitted:', data); // never log real passwords
+      showToast(`Welcome back, ${data.username}!`);
+      form.reset();
+    });
+  </script>
+</body>
+</html>
